@@ -1,26 +1,411 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Sistema visual inspirado en Apple HIG (tipografía del sistema, formas, sombras y movimiento)
+ * con la paleta de Angular Material 12, tema "indigo-pink":
+ *   primary = mat-indigo (500 / 700 / 100), accent = mat-pink A200, warn = mat-red 500.
+ *
+ * superficies agrupadas sobre fondo gris claro, sombras suaves y materiales translúcidos.
+ * Los nombres de los tokens se conservan para que las pantallas no cambien.
+ */
+@theme {
+  --color-primary: #3f51b5;
+  --color-primary-dark: #303f9f;
+  --color-primary-light: #c5cae9;
+  --color-primary-50: #e8eaf6;
+  --color-on-primary: #ffffff;
+
+  --color-accent: #ff4081;
+  --color-accent-dark: #f50057;
+  --color-accent-light: #ff80ab;
+  --color-accent-50: #fce4ec;
+
+  --color-warn: #f44336;
+  --color-warn-dark: #d32f2f;
+  --color-warn-light: #ffcdd2;
+
+  --color-success: #4caf50;
+  --color-success-dark: #2e7d32;
+  --color-success-light: #c8e6c9;
+  --color-caution: #ff9800;
+  --color-caution-dark: #e65100;
+  --color-caution-light: #ffe0b2;
+
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-fill: rgba(0, 0, 0, 0.06);
+  --color-text: rgba(0, 0, 0, 0.87);
+  --color-text-2: rgba(0, 0, 0, 0.54);
+  --color-text-disabled: rgba(0, 0, 0, 0.38);
+  --color-divider: rgba(0, 0, 0, 0.12);
+  --color-hover: rgba(0, 0, 0, 0.04);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Helvetica Neue", sans-serif;
+
+  --radius-card: 14px;
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Aproximación de un spring críticamente amortiguado (damping 1.0) */
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --shadow-z1: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-z2: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.06), 0 4px 14px rgba(0, 0, 0, 0.06);
+  --shadow-z4: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.08), 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-z8: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.12), 0 20px 50px rgba(0, 0, 0, 0.12);
+  --shadow-z24: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 20px 40px rgba(0, 0, 0, 0.16), 0 40px 100px rgba(0, 0, 0, 0.2);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.47;
+  letter-spacing: -0.01em;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tracking dependiente del tamaño: los títulos grandes se aprietan */
+h1 {
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-weight: 700;
+}
+h2 {
+  letter-spacing: -0.022em;
+  line-height: 1.2;
+}
+
+::selection {
+  background: var(--color-primary-light);
+}
+
+:focus-visible {
+  outline: 3px solid rgba(63, 81, 181, 0.45);
+  outline-offset: 2px;
+}
+
+.material-icons {
+  font-family: "Material Icons";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* Material translúcido (barras, hojas, snackbar) */
+.material-bar {
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+.material-thick {
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: saturate(180%) blur(30px);
+  backdrop-filter: saturate(180%) blur(30px);
+}
+
+/* Campo de formulario con relleno suave (sin contorno duro) */
+.mat-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.mat-field > label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-2);
+  transition: color 0.15s;
+}
+.mat-field input,
+.mat-field select,
+.mat-field textarea {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: inherit;
+  letter-spacing: inherit;
+  outline: none;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.2s var(--ease-out-expo);
+  min-height: 40px;
+  width: 100%;
+  min-width: 0;
+}
+.mat-field input::placeholder,
+.mat-field textarea::placeholder {
+  color: var(--color-text-disabled);
+}
+.mat-field input:hover,
+.mat-field select:hover,
+.mat-field textarea:hover {
+  background: rgba(0, 0, 0, 0.09);
+}
+.mat-field input:focus,
+.mat-field select:focus,
+.mat-field textarea:focus {
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(63, 81, 181, 0.18);
+}
+.mat-field:focus-within > label {
+  color: var(--color-primary);
+}
+.mat-field input:disabled,
+.mat-field select:disabled {
+  color: var(--color-text-disabled);
+  background: rgba(0, 0, 0, 0.03);
+}
+.mat-field .hint {
+  font-size: 12px;
+  color: var(--color-text-2);
+}
+
+.mat-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mat-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-text-2);
+  padding: 0 16px;
+  height: 44px;
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap;
+}
+.mat-table td {
+  padding: 0 16px;
+  height: 52px;
+  border-bottom: 0.5px solid var(--color-divider);
+}
+.mat-table tbody tr {
+  transition: background-color 0.12s;
+}
+.mat-table tbody tr:hover {
+  background: var(--color-hover);
+}
+.mat-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.mat-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Feedback inmediato al presionar (en pointer-down, no al soltar) */
+.press {
+  transition:
+    transform 0.18s var(--ease-spring),
+    background-color 0.15s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+}
+.press:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: 0.08s;
+}
+
+
+/*
+ * Liquid Glass: botones translúcidos con desenfoque, borde de luz y brillo especular.
+ * El color (paleta Angular Material) actúa como tinte del cristal, no como relleno plano.
+ */
+@layer components {
+.glass {
+  position: relative;
+  isolation: isolate;
+  --tint: var(--color-primary);
+  --glass-top: rgba(255, 255, 255, 0.42);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  background: color-mix(in srgb, var(--tint) 84%, transparent);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.14),
+    0 8px 18px -6px color-mix(in srgb, var(--tint) 55%, transparent);
+  transition:
+    transform 0.25s var(--ease-spring),
+    box-shadow 0.25s var(--ease-spring),
+    background-color 0.2s,
+    filter 0.2s,
+    opacity 0.15s;
+}
+/* Brillo especular: luz que cae sobre la mitad superior del cristal */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 20% -20%, var(--glass-top), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 50%);
+}
+.glass:hover:not(:disabled) {
+  filter: brightness(1.07) saturate(1.1);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.85),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.14),
+    0 12px 24px -6px color-mix(in srgb, var(--tint) 60%, transparent);
+}
+.glass:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(0.96);
+}
+.glass-primary { --tint: var(--color-primary); color: #fff; }
+.glass-accent { --tint: var(--color-accent); color: #fff; }
+.glass-warn { --tint: var(--color-warn); color: #fff; }
+/* Cristal claro (botón neutro / contorno) */
+.glass-clear {
+  --glass-top: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--color-text);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 0.5px rgba(0, 0, 0, 0.1),
+    0 4px 12px -4px rgba(0, 0, 0, 0.14);
+}
+.glass-clear:hover:not(:disabled) {
+  filter: none;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 0 1px 0.5px #fff,
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 0 0 0.5px rgba(0, 0, 0, 0.12),
+    0 8px 18px -4px rgba(0, 0, 0, 0.18);
+}
+/* Botón de icono: el cristal aparece al acercar el puntero */
+.glass-ghost {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: transparent;
+  box-shadow: none;
+}
+.glass-ghost::before { opacity: 0; transition: opacity 0.2s; }
+.glass-ghost:hover:not(:disabled) {
+  filter: none;
+  background: rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0.5px #fff,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 0.5px rgba(0, 0, 0, 0.1),
+    0 4px 12px -4px rgba(0, 0, 0, 0.16);
+}
+.glass-ghost:hover:not(:disabled)::before { opacity: 1; }
+}
+
+@keyframes mat-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes mat-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Las hojas "se materializan": escala + desenfoque + opacidad a la vez */
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Accesibilidad: movimiento, transparencia y contraste reducidos */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .press:active:not(:disabled),
+  .glass:active:not(:disabled) {
+    transform: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--tint);
+  }
+  .glass-clear {
+    background: var(--color-surface);
+  }
+  .glass::before {
+    display: none;
+  }
+  .material-bar,
+  .material-thick {
+    background: var(--color-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  :root {
+    --color-divider: rgba(0, 0, 0, 0.4);
+    --color-text-2: rgba(0, 0, 0, 0.8);
+  }
+  .mat-field input,
+  .mat-field select,
+  .mat-field textarea {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
 }
