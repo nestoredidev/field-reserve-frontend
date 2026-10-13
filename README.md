@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Field Reserve · Frontend
 
-## Getting Started
+Frontend (Next.js 16 + Tailwind 4) del sistema de reservas de canchas y bodega. Consume la API
+`/api/v2` de `field-reserve-backend` (Spring Boot) y usa la paleta de Angular Material 12
+(tema *indigo-pink*).
 
-First, run the development server:
+## Desarrollo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+El backend debe estar en `http://localhost:8080`. Next.js reenvía `/api/v2/*` a esa URL
+(`next.config.ts`), así que no hace falta CORS. Para otra URL:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+BACKEND_URL=http://otro-host:8080 pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Usuario inicial: `admin` con la contraseña de `app.bootstrap.admin-password` del backend.
 
-## Learn More
+## Pantallas
 
-To learn more about Next.js, take a look at the following resources:
+| Ruta | Endpoints |
+| --- | --- |
+| `/login` | `POST /auth/login`, `GET /auth/me` |
+| `/` | resumen del día: reservas, cajas, stock bajo, `reportes/resumen-general` (ADMIN) |
+| `/reservas`, `/reservas/[id]` | `reservas`, `reservas/disponibilidad`, pagos, reprogramar, cancelar, no-asistió, completar, monto, `mantenimientos` |
+| `/clientes` | `clientes` (búsqueda, alta, edición, historial de reservas) |
+| `/caja`, `/bodega/caja` | `cancha/cajas`, `bodega/cajas` (abrir, movimientos, cerrar, historial) |
+| `/canchas` | `canchas`, `canchas/{id}/tarifas`, `tarifas/{id}` |
+| `/bodega/ventas` | punto de venta y historial de `bodega/ventas` |
+| `/bodega/productos` | `bodega/productos`, `bodega/inventario` (ajustes y kardex) |
+| `/bodega/compras` | `bodega/compras` |
+| `/bodega/categorias`, `/bodega/proveedores` | CRUD |
+| `/reportes`, `/usuarios` | solo ADMIN |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Estructura
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `lib/api.ts`: cliente HTTP con JWT (guardado en `localStorage`) y todos los endpoints.
+- `lib/types.ts`: tipos de los DTOs del backend.
+- `components/ui.tsx`: componentes estilo Angular Material (botones, campos, tablas, diálogos, snackbar).
+- `app/(app)/*`: pantallas protegidas dentro del layout con barra y menú lateral.
